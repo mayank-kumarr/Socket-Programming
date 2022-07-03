@@ -1,0 +1,138 @@
+Documentation
+CS 39006: Networks Lab
+Assignment 4: File Transfer Using Sockets
+
+
+-------------------------------
+DESCRIPTION OF MESSAGE FORMATS:
+-------------------------------
+
+In this assignment, there are two kinds of messages:
+
+1. Data Message:
+    The size of the message is at most 100 bytes and the number of messages (maximum size of two tables, 50*2) is at most 100.
+    Thus, the data message is a 103 byte message which looks like: "DMN" followed by the 100 byte message.
+    Here, D specifies data message and MN is the ID of the message.
+    Since there are at most 100 messages, the IDs will range from 0 to 99.
+    Hence, X stores the tens place and Y stores the units place of the ID.
+    For example: If ID 29 has message "Mayank", then the message will look like: "D29Mayank".
+
+2. ACK Message:
+    The acknowledgement is just of 4 bytes, which has the format: "AXY".
+    Here A specifies acknowledgement, and X is the tens place and Y is the units place of the ID.
+
+
+--------------------------------------------------
+DESCRIPTION OF DATA STRUCTURES AND VARIABLES USED:
+--------------------------------------------------
+
+1. struct recvmsg:
+    Structure that stores the message and the source address of the message.
+
+2. recvbuffer: 
+	An circular queue implemented using an array of recvmsg structure that is used to store the received messages.
+    It is operated upon using two more integers:
+	    a. rbuf_addend:  This is the end where we are adding a new recv msg.
+                         This acts as the rear part of the recvbuffer queue.
+	    b. rbuf_recvend: This is the end where from where we are picking a new message.
+                         This acts as the front part of the recvbuffer queue.
+
+3. struct unackmsg:
+    Structure that stores the sent but unacknowledged messages.
+    Various fields of the same have been described in the rsocket.h file.
+
+4. unackmsgtb:
+	A Hash Table of struct unackmsg that is used to store the unacknowledged messages.
+    Hashing is done wrt the ID of the message sent.
+	The macro HASH is used to tell the size of the hash index.
+	Here, hash table is beneficial for two reasons:
+	    a) Memory used is less, i.e., just the number of unacknowledged messages.
+	    b) Searching is fast in hash tables.
+	size_unackmsgtb is used to store the size of the table i.e number of unacknowledged messages.
+
+5. bool *recvmsgidtb:
+	Array that stores true/false for various IDs that have been received by the receiver.
+	Here, hash table is not used unlike the above for the following reasons:
+		a) This table is used just for searching if an ID message has been received or not, or for updating that the message has been received.
+           It is much faster in case of such an array.
+		b) In unackmsgtb, we had to traverse all the elements in the table, for example while retransmission.
+           No such situation arises in this case. Hence, it is better to use this table.
+
+6. locks:
+    unackmsgtblock and recvbufferlock to create mutual exclusion for proper synchronisation while updating the tables.
+
+7. N_retransmissions:
+    To calculate the number of retransmissions.
+
+8. next_unused_id:
+    To create an ID for the message to be sent.
+
+9. udpsockfd:
+    Stores the ID of the udp socket.
+
+
+------------------------------------------
+OTHER FEATURES INCLUDED IN THE ASSIGNMENT:
+------------------------------------------
+
+1. MSG_DONTWAIT flag: 
+	If the flag is MSG_DONTWAIT for the r_recvfrom call, it will simply check the buffer,
+    and return a message from the buffer if present, else set everything to NULL and return -1.
+
+
+-------------------------------------------------------------------------------
+OUTPUTS AND NUMBER OF TRANSMISSIONS AND RETRANSMISSIONS FOR DIFFERENT P VALUES:
+-------------------------------------------------------------------------------
+
+String used: "File Transfer Using Sockets"
+Length of string: 27
+
+P = 0.05
+Average No. of Retransmissions for P = 0.05 is 0.148
+Average No. of   Transmissions for P = 0.05 is 1.148
+Output: "File Transfer Using ocketsS"
+
+P = 0.1
+Average No. of Retransmissions for P = 0.10 is 0.296
+Average No. of   Transmissions for P = 0.10 is 1.296
+Output: "Fl Transfer Using Socketsie"
+
+P = 0.15
+Average No. of Retransmissions for P = 0.15 is 0.556
+Average No. of   Transmissions for P = 0.15 is 1.556
+Output: "File Trasfr Uing Socketsesn"
+
+P = 0.2
+Average No. of Retransmissions for P = 0.20 is 0.815
+Average No. of   Transmissions for P = 0.20 is 1.815
+Output: "File rnsUsin ocktsere TgaSf"
+
+P = 0.25
+Average No. of Retransmissions for P = 0.25 is 0.963
+Average No. of   Transmissions for P = 0.25 is 1.963
+Output: "File Tansfr sing SckestUroe"
+
+P = 0.3
+Average No. of Retransmissions for P = 0.30 is 0.889
+Average No. of   Transmissions for P = 0.30 is 1.889
+Output: "Fle Taner Uig oetscksrSsfin"
+
+P = 0.35
+Average No. of Retransmissions for P = 0.35 is 1.481
+Average No. of   Transmissions for P = 0.35 is 2.481
+Output: "ile rnerUn SocketsFsTgas if"
+
+P = 0.40
+Average No. of Retransmissions for P = 0.40 is 0.926
+Average No. of   Transmissions for P = 0.40 is 1.926
+Output: "FileTrsfr singSescU a noekt"
+
+P = 0.45
+Average No. of Retransmissions for P = 0.45 is 1.519
+Average No. of   Transmissions for P = 0.45 is 2.519
+Output: "l ranfer UigSotscFkieeTn ss"
+
+P = 0.5
+Average No. of Retransmissions for P = 0.50 is 3.074
+Average No. of   Transmissions for P = 0.50 is 4.074
+Output: "FilTrsrsi SocktseUngne  afe"
