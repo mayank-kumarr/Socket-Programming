@@ -1,4 +1,4 @@
-# Systems-Programming
+# Socket-Programming
 
 ## Assignment submission of the course Networks Lab (CS39006) at IIT Kharagpur
 
